@@ -1,6 +1,6 @@
-import React from 'react'
-import styled from 'styled-components'
-import { Draggable } from 'react-beautiful-dnd'
+import React from 'react';
+import styled from 'styled-components';
+import { Draggable } from 'react-beautiful-dnd';
 
 const Container = styled.li`
   border: 1px solid lightgray;
@@ -9,14 +9,12 @@ const Container = styled.li`
   margin-bottom: 8px;
   list-style: none;
   display: flex;
-  background-color: ${props => (props.isDragging ? 'lightgreen' : 'white')};
-`
+  background-color: ${(props) => (props.isDragging ? 'lightgreen' : 'white')};
+`;
 
-export const Task = (props) => {
-  const { index, task } = props
+export const Task = ({ index, task }) => {
   return (
-    <Draggable 
-      draggableId={task.id} index={index}>
+    <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => (
         <Container
           {...provided.draggableProps}
@@ -24,9 +22,9 @@ export const Task = (props) => {
           ref={provided.innerRef}
           isDragging={snapshot.isDragging}
         >
-        {task.content}
+          {task.content}
         </Container>
       )}
-      </Draggable>
-  )
-}
+    </Draggable>
+  );
+};

@@ -3,7 +3,7 @@
  * 1. onDragStart
  * 2. onDragUpdate
  * 3. onDragEnd
- * 
+ *
  * ただし、onDragStartやonDragUpdateを使ってスタイルを変更するのではなく、
  * スナップショットを使ってスタイルを当てていくことをする（方が多い？的な）
  */
@@ -13,22 +13,22 @@ const start = {
   draggableId: 'task-1',
   type: 'TYPE',
   source: {
-    droppableId: 'column-1',
+    droppableId: 'Todo',
     index: 0,
-  }
-}
+  },
+};
 
 // onDragUpdate
 const update = {
   ...start,
   destination: {
-    droppableId: 'column-1',
+    droppableId: 'Todo',
     index: 1,
-  }
-}
+  },
+};
 
 // onDragEnd
 const result = {
   ...update,
-  reason: 'DROP'
-}
+  reason: 'DROP',
+};

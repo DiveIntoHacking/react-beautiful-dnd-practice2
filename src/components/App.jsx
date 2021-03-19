@@ -1,0 +1,179 @@
+import '@atlaskit/css-reset';
+import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
+import { DragDropContext } from 'react-beautiful-dnd';
+
+import { Column } from './Column';
+import { InputArea } from './InputArea';
+
+const Container = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
+const AppContainer = styled.div`
+  width: 50%;
+  margin: 0 auto;
+`;
+
+const TODO = 'Todo';
+const PROGRESS = 'Progress';
+const DONE = 'Done';
+
+const generateInitialData = () => {
+  const COLUMNS = [TODO, PROGRESS, DONE];
+  const columns = {};
+  const initialTasks = {};
+
+  COLUMNS.forEach(
+    (column) =>
+      (columns[column] = {
+        id: column,
+        title: column,
+        taskIds: [],
+      })
+  );
+
+  return {
+    tasks: initialTasks,
+    columns,
+    columnOrder: COLUMNS,
+  };
+};
+
+const initialData = generateInitialData();
+const tasksLength = initialData.columns['Todo'].taskIds.length;
+const initialTodo = '';
+
+const App = () => {
+  const [countId, setCountId] = useState(tasksLength);
+  const [initData, setInitData] = useState(initialData);
+  const [inputTodo, setInputTodo] = useState(initialTodo);
+
+  const onInputChange = useCallback((e) => setInputTodo(e.target.value), []);
+
+  const onBtnClick = () => {
+    const newTaskId = countId + 1;
+    const newTaskIds = [...initData.columns[TODO].taskIds];
+    newTaskIds.push(`task${newTaskId}`);
+
+    const newTodoColumn = {
+      ...initData.columns[TODO],
+      taskIds: newTaskIds,
+    };
+
+    const newColumns = {
+      ...initData.columns,
+      Todo: newTodoColumn,
+    };
+
+    const newTasks = { ...initData.tasks };
+    const taskKey = `task${newTaskId}`;
+    newTasks[taskKey] = { id: `task${newTaskId}`, content: inputTodo };
+
+    const newState = {
+      ...initData,
+      tasks: newTasks,
+      columns: newColumns,
+    };
+
+    setInitData(newState);
+    setInputTodo(initialTodo);
+    setCountId(newTaskId);
+  };
+
+  const onKeyDown = (e) => {
+    if (e.keyCode === 13) {
+      onBtnClick();
+    }
+  };
+
+  const onDragEnd = ({ destination, source, draggableId }) => {
+    if (!destination) return;
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const start = initData.columns[source.droppableId];
+    const finish = initData.columns[destination.droppableId];
+
+    if (start === finish) {
+      const newTaskIds = Array.from(start.taskIds);
+      newTaskIds.splice(source.index, 1); // 持っている元のインデックスから1つ配列から削除する
+      newTaskIds.splice(destination.index, 0, draggableId); // 置いた先のインデックスに持っている元のidを追加する
+
+      // columnオブジェクトのコピーの後、プロパティを追加して新しいオブジェクトを作る
+      const newColumn = {
+        ...start, // コピー　いったんここでコピーするのがキモ
+        taskIds: newTaskIds, // 追加するプロパティ(taskIdsはもともとあるプロパティなので、このプロパティに上書きされる)
+      };
+
+      const newState = {
+        ...initData, // stateのコピー　キモ
+        columns: {
+          // もともとのcolumnsを以下に変更する
+          ...initData.columns,
+          [newColumn.id]: newColumn,
+        },
+      };
+
+      setInitData(newState);
+      return;
+    }
+
+    const startTaskIds = Array.from(start.taskIds);
+    startTaskIds.splice(source.index, 1); // draggableなタスクを元の配列から削除
+    const newStart = {
+      ...start, // 元のタスクたちをコピー
+      taskIds: startTaskIds, // もとのタスクのtaskIdsを、draggableなタスクを削除した配列に置き換える
+    };
+
+    const finishTaskIds = Array.from(finish.taskIds); // droppableのtaskIdsを登録
+    finishTaskIds.splice(destination.index, 0, draggableId); // 置いた場所のindexにdraggableなタスクを追加
+    const newFinish = {
+      ...finish, // 置いた先のdroppableをコピー
+      taskIds: finishTaskIds, // 置いた先droppableIdsを、draggableなタスクを追加した配列に置き換える
+    };
+
+    const newState = {
+      ...initData, // stateのコピー
+      columns: {
+        // columnsを変更する
+        ...initData.columns, // columnsのコピー
+        [newStart.id]: newStart, // dragを開始したcolumnIdに、新しい配列（タスクを削除した配列）を当てる
+        [newFinish.id]: newFinish, // dragをしたcolumnIdに、新しい配列(タスクを追加した配列)を当てる
+      },
+    };
+
+    setInitData(newState);
+  };
+
+  return (
+    <AppContainer>
+      <InputArea
+        inputTodo={inputTodo}
+        onChange={onInputChange}
+        onClick={onBtnClick}
+        onEnter={onKeyDown}
+      />
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Container>
+          {initData.columnOrder.map((columnId) => {
+            const column = initData.columns[columnId];
+            const tasks = column.taskIds.map(
+              (taskId) => initData.tasks[taskId]
+            );
+
+            return <Column key={column.id} column={column} tasks={tasks} />;
+          })}
+        </Container>
+      </DragDropContext>
+    </AppContainer>
+  );
+};
+
+export default App;

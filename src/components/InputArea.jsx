@@ -1,9 +1,9 @@
-import React from 'react'
-import styled from 'styled-components'
+import React from 'react';
+import styled from 'styled-components';
 
 const InputWrap = styled.div`
   display: flex;
-`
+`;
 
 const InputFrom = styled.input`
   padding: 20px;
@@ -20,7 +20,7 @@ const InputFrom = styled.input`
   &:focus {
     border: 1px solid skyblue;
   }
-`
+`;
 
 const Button = styled.button`
   border: none;
@@ -30,19 +30,25 @@ const Button = styled.button`
   flex-basis: 20%;
   margin: 8px;
   outline: none;
-  transition: background-color .3s ease;
+  transition: background-color 0.3s ease;
 
   &:hover {
     background-color: skyblue;
   }
-` 
+`;
 
 export const InputArea = (props) => {
-  const { inputTodo, onChange, onClick, onEnter } = props
+  const { inputTodo, onChange, onClick, onEnter } = props;
   return (
     <InputWrap>
-      <InputFrom type="text" placeholder="TODOを入力" value={inputTodo} onChange={onChange} onKeyDown={onEnter}/>
+      <InputFrom
+        type="text"
+        placeholder="TODOを入力"
+        value={inputTodo}
+        onChange={onChange}
+        onKeyDown={onEnter}
+      />
       <Button onClick={onClick}>追加</Button>
     </InputWrap>
-  )
-}
+  );
+};
